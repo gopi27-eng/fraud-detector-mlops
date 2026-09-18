@@ -1,0 +1,5 @@
+---
+base : 
+  project_name: "fraud-detector-mlops"
+  random_state: 42
+
