@@ -1,0 +1,30 @@
+2026-09-18 12:38:47 | INFO | [+] Loading raw dataset from: data/raw/raw.csv
+2026-09-18 12:41:07 | INFO | [+] Loading raw dataset from: data/raw/raw.csv
+2026-09-18 12:42:42 | INFO | [+] Loading raw dataset from: data/raw/raw.csv
+2026-09-18 12:42:42 | INFO | [+] Temporal cutoff on 'step': 603.2 (Ratio: 20.0%)
+2026-09-18 12:43:20 | INFO | [+] Loading raw dataset from: data/raw/raw.csv
+2026-09-18 12:43:20 | INFO | [+] Temporal cutoff on 'step': 603.2 (Ratio: 20.0%)
+2026-09-18 12:44:30 | INFO | [+] Loading raw dataset from: data/raw/raw.csv
+2026-09-18 12:44:30 | INFO | [+] Temporal cutoff on 'step': 603.2 (Ratio: 20.0%)
+2026-09-18 12:45:04 | INFO | [+] Loading raw dataset from: data/raw/raw.csv
+2026-09-18 12:45:04 | INFO | [+] Temporal cutoff on 'step': 603.2 (Ratio: 20.0%)
+2026-09-18 12:47:43 | INFO | [+] Loading raw dataset from: data/raw/raw.csv
+2026-09-18 12:47:43 | INFO | [+] Temporal cutoff on 'step': 603.2 (Ratio: 20.0%)
+2026-09-18 12:51:23 | INFO | [+] Loading raw dataset from: data/raw/raw.csv
+2026-09-18 12:51:23 | INFO | [+] Temporal cutoff on 'step': 603.2 (Ratio: 20.0%)
+2026-09-18 12:52:49 | INFO | [+] Loading raw dataset from: data/raw/raw_with_target.csv
+2026-09-18 12:52:49 | INFO | [+] Temporal cutoff on 'step': 603.2 (Ratio: 20.0%)
+2026-09-18 12:52:49 | INFO | ============================================================
+2026-09-18 12:52:49 | INFO | Total Records: 1,000
+2026-09-18 12:52:49 | INFO | Train Records: 800 | Fraud Rate: 0.0000% | Step Range: [1 - 603]
+2026-09-18 12:52:49 | INFO | Test Records:  200 | Fraud Rate: 0.0000% | Step Range: [604 - 742]
+2026-09-18 12:52:49 | INFO | ============================================================
+2026-09-18 12:59:40 | INFO | [+] Loading raw dataset from: data/raw/raw_with_target.csv
+2026-09-18 12:59:40 | INFO | [+] Temporal cutoff on 'step': 603.2 (Ratio: 20.0%)
+2026-09-18 13:00:36 | INFO | [+] Loading raw dataset from: data/raw/raw_with_target.csv
+2026-09-18 13:00:36 | INFO | [+] Temporal cutoff on 'step': 603.2 (Ratio: 20.0%)
+2026-09-18 13:00:36 | INFO | ============================================================
+2026-09-18 13:00:36 | INFO | Total Records: 1,000
+2026-09-18 13:00:36 | INFO | Train Records: 800 | Fraud Rate: 3.2500% | Step Range: [1 - 603]
+2026-09-18 13:00:36 | INFO | Test Records:  200 | Fraud Rate: 3.5000% | Step Range: [604 - 742]
+2026-09-18 13:00:36 | INFO | ============================================================
