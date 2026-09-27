@@ -48,11 +48,11 @@ jobs:
           MLFLOW_TRACKING_URI: ./mlruns
         run: |
           echo "[+] Running automated retraining pipeline stages..."
-          python src/stages/01_ingest_and_split.py
-          python src/stages/02_preprocess.py
-          python src/stages/03_train.py
-          python src/stages/04_evaluate.py
-
+          python src/stages/01_ingest_and_split.py --config config/params.yaml
+          python src/stages/02_preprocess.py --config config/params.yaml
+          python src/stages/03_train.py --config config/params.yaml
+          python src/stages/04_evaluate.py --config config/params.yaml
+        
       - name: Verify Model Artifacts and Quality Gate
         run: |
           test -f artifacts/preprocessor.joblib || { echo "[-] Preprocessor artifact missing"; exit 1; }
