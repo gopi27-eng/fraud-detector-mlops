@@ -94,6 +94,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-serve.txt pytest httpx
 
+      
       - name: Download Artifacts from CT
         uses: actions/download-artifact@v4
         with:
@@ -102,12 +103,11 @@ jobs:
 
       - name: Verify Artifact Placement for API
         run: |
-          # If download-artifact created a nested directory, flatten it
           if [ -d "artifacts/model-artifacts" ]; then
             mv artifacts/model-artifacts/* artifacts/
             rmdir artifacts/model-artifacts
           fi
-          echo "[+] Artifacts present in runner:"
+          echo "[+] Verified artifacts:"
           ls -la artifacts/
 
       - name: Run Unit & API Endpoint Tests
@@ -116,7 +116,7 @@ jobs:
           ARTIFACTS_DIR: artifacts
         run: |
           pytest tests/ -v -s
-
+        
   # -------------------------------------------------------------
   # 3. CONTINUOUS DEPLOYMENT (CD)
   # Build Docker Image, Push to ECR, and Roll out to EKS
