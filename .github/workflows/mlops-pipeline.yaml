@@ -35,7 +35,7 @@ jobs:
           PYTHONPATH: .
         run: |
           echo "[+] Running automated retraining pipeline stages..."
-          python "src/stages/01 ingest.py"
+          python "src/stages/01 ingest and split.py"
           python "src/stages/02 preprocess.py"
           python "src/stages/03 train.py"
           python "src/stages/04 elevate.py"
