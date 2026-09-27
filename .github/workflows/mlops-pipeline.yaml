@@ -11,6 +11,10 @@ jobs:
   # 1. CONTINUOUS TRAINING (CT)
   # Executes sequential model training stages and verifies artifacts
   # -------------------------------------------------------------
+# -------------------------------------------------------------
+  # 1. CONTINUOUS TRAINING (CT)
+  # Authenticates to AWS, pulls data via DVC from S3, trains model
+  # -------------------------------------------------------------
   continuous-training:
     name: Continuous Training (CT)
     runs-on: ubuntu-latest
@@ -28,7 +32,21 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements-serve.txt
+          pip install -r requirements-serve.txt "dvc[s3]"
+
+      # Authenticate so DVC has permission to read from your S3 bucket
+      - name: Configure AWS Credentials for DVC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Pull tracked dataset directly from S3
+      - name: Pull Data from S3 via DVC
+        run: |
+          echo "[+] Pulling versioned dataset from S3..."
+          dvc pull data/raw/raw_with_target.csv.dvc || dvc pull
 
       - name: Run Sequential Training Stages
         env:
@@ -52,7 +70,6 @@ jobs:
           name: model-artifacts
           path: artifacts/
           retention-days: 1
-
   # -------------------------------------------------------------
   # 2. CONTINUOUS INTEGRATION (CI)
   # Unit tests, API schema assertions, and endpoint validation
