@@ -46,7 +46,7 @@ jobs:
       - name: Pull Data from S3 via DVC
         run: |
           echo "[+] Pulling versioned dataset from S3..."
-          dvc pull data/raw/raw_with_target.csv.dvc || dvc pull
+          dvc pull data/raw/raw_with_target.csv.dvc
 
       - name: Run Sequential Training Stages
         env:
