@@ -35,10 +35,10 @@ jobs:
           PYTHONPATH: .
         run: |
           echo "[+] Running automated retraining pipeline stages..."
-          python "src/stages/01 ingest and split.py"
-          python "src/stages/02 preprocess.py"
-          python "src/stages/03 train.py"
-          python "src/stages/04 elevate.py"
+          python src/stages/01_ingest_and_split.py
+          python src/stages/02_preprocess.py
+          python src/stages/03_train.py
+          python src/stages/04_evaluate.py
 
       - name: Verify Model Artifacts and Quality Gate
         run: |
