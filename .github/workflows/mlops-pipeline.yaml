@@ -32,10 +32,10 @@ jobs:
       - name: Run Sequential Training Stages
         run: |
           echo "[+] Running automated retraining pipeline stages..."
-          python -m src.stages.01_data_ingestion
-          python -m src.stages.02_data_preprocessing
-          python -m src.stages.03_model_training
-          python -m src.stages.04_model_evaluation
+          python -m src.stages.01_ingest_and_split.py
+          python -m src.stages.02_preprocess.py
+          python -m src.stages.03_training.py
+          python -m src.stages.04_evaluation.py
 
       - name: Verify Model Artifacts and Quality Gate
         run: |
