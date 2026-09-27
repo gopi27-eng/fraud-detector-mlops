@@ -9,6 +9,7 @@ on:
 jobs:
   # -------------------------------------------------------------
   # 1. CONTINUOUS TRAINING (CT)
+  # Executes sequential model training stages and verifies artifacts
   # -------------------------------------------------------------
   continuous-training:
     name: Continuous Training (CT)
@@ -34,10 +35,10 @@ jobs:
           PYTHONPATH: .
         run: |
           echo "[+] Running automated retraining pipeline stages..."
-          python src/stages/01_ingest_and_split.py
-          python src/stages/02_preprocess.py
-          python src/stages/03_train.py
-          python src/stages/04_evaluate.py
+          python "src/stages/01 ingest.py"
+          python "src/stages/02 preprocess.py"
+          python "src/stages/03 train.py"
+          python "src/stages/04 elevate.py"
 
       - name: Verify Model Artifacts and Quality Gate
         run: |
@@ -54,6 +55,7 @@ jobs:
 
   # -------------------------------------------------------------
   # 2. CONTINUOUS INTEGRATION (CI)
+  # Unit tests, API schema assertions, and endpoint validation
   # -------------------------------------------------------------
   continuous-integration:
     name: Continuous Integration (CI)
@@ -85,6 +87,7 @@ jobs:
 
   # -------------------------------------------------------------
   # 3. CONTINUOUS DEPLOYMENT (CD)
+  # Build Docker Image, Push to ECR, and Roll out to EKS
   # -------------------------------------------------------------
   continuous-deployment:
     name: Continuous Deployment (CD)
