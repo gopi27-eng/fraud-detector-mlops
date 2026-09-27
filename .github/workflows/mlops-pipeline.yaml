@@ -1,0 +1,144 @@
+name: MLOps CI-CD-CT Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # -------------------------------------------------------------
+  # 1. CONTINUOUS TRAINING (CT)
+  # Runs the DVC pipeline if code/data changes, checks Quality Gate
+  # -------------------------------------------------------------
+  continuous-training:
+    name: Continuous Training (CT)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run DVC Pipeline (CT Trigger)
+        run: |
+          echo "[+] Running automated retraining pipeline..."
+          # Force pipeline execution to validate artifact generation
+          dvc repro --force
+
+      - name: Verify Model Artifacts and Quality Gate
+        run: |
+          test -f artifacts/preprocessor.joblib || { echo "Preprocessor artifact missing"; exit 1; }
+          test -f artifacts/model.json || { echo "Model artifact missing"; exit 1; }
+          echo "[+] CT Pipeline passed. Model artifacts generated successfully."
+
+      - name: Upload Trained Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: model-artifacts
+          path: artifacts/
+          retention-days: 1
+
+  # -------------------------------------------------------------
+  # 2. CONTINUOUS INTEGRATION (CI)
+  # Code formatting, unit tests, and API contract validation
+  # -------------------------------------------------------------
+  continuous-integration:
+    name: Continuous Integration (CI)
+    needs: continuous-training
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Serving Requirements & Test Tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-serve.txt pytest httpx
+
+      - name: Download Artifacts from CT
+        uses: actions/download-artifact@v4
+        with:
+          name: model-artifacts
+          path: artifacts/
+
+      - name: Run Unit & API Endpoint Tests
+        run: |
+          pytest tests/ -v
+
+  # -------------------------------------------------------------
+  # 3. CONTINUOUS DEPLOYMENT (CD)
+  # Build Docker Image, Push to ECR, and Roll out to EKS
+  # -------------------------------------------------------------
+  continuous-deployment:
+    name: Continuous Deployment (CD)
+    needs: continuous-integration
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download Artifacts from CT
+        uses: actions/download-artifact@v4
+        with:
+          name: model-artifacts
+          path: artifacts/
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, Tag, and Push Docker Image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # Build with commit hash and latest tag
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+      - name: Update Kubeconfig
+        run: |
+          aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name ${{ secrets.EKS_CLUSTER_NAME }}
+
+      - name: Deploy to Amazon EKS (Zero-Downtime Rolling Update)
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # Apply base manifests
+          kubectl apply -f k8s/service.yaml
+          kubectl apply -f k8s/deployment.yaml
+
+          # Update the deployment image to the newly pushed commit SHA
+          kubectl set image deployment/fraud-detector-api api=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+          # Wait for rolling update rollout to finish
+          kubectl rollout status deployment/fraud-detector-api --timeout=180s
+
+          echo "[+] Deployment successfully rolled out to EKS."
