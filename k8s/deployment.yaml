@@ -6,6 +6,11 @@ metadata:
     app: fraud-detector-api
 spec:
   replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
   selector:
     matchLabels:
       app: fraud-detector-api
@@ -16,26 +21,26 @@ spec:
     spec:
       containers:
       - name: api
-        image: 238788379449.dkr.ecr.ap-south-1.amazonaws.com/fraud-detector-api:v1
-        imagePullPolicy: IfNotPresent
+        image: 238788379449.dkr.ecr.ap-south-1.amazonaws.com/fraud-detector-api:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8000
         resources:
           requests:
-            cpu: "100m"
-            memory: "180Mi"
+            cpu: 100m
+            memory: 180Mi
           limits:
-            cpu: "250m"
-            memory: "300Mi"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8000
-          initialDelaySeconds: 15
-          periodSeconds: 20
+            cpu: 250m
+            memory: 300Mi
         readinessProbe:
           httpGet:
             path: /health
             port: 8000
           initialDelaySeconds: 10
           periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 15
+          periodSeconds: 20
