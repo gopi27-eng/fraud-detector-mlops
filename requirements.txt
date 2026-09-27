@@ -1,0 +1,5 @@
+# requirements.txt
+-r requirements-serve.txt
+dvc>=3.0.0
+pytest>=8.0.0
+httpx>=0.27.0
