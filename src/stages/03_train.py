@@ -17,9 +17,9 @@ def train_model(config_path: str):
 
     # MLflow Tracking Configuration
     # Uses environment variable if provided (e.g. in GitHub Actions), otherwise local directory
-    tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "file:./mlruns")
+    
+    tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "sqlite:///mlflow.db")
     mlflow.set_tracking_uri(tracking_uri)
-
     experiment_name = config.get("train", {}).get(
         "experiment_name", "fraud-detector-training"
     )

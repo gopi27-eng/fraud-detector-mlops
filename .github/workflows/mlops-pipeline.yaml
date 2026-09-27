@@ -45,13 +45,15 @@ jobs:
       - name: Run Sequential Training Stages
         env:
           PYTHONPATH: .
-          MLFLOW_TRACKING_URI: ./mlruns
+          MLFLOW_TRACKING_URI: sqlite:///mlflow.db
+          MLFLOW_ALLOW_FILE_STORE: "true"
         run: |
           echo "[+] Running automated retraining pipeline stages..."
           python src/stages/01_ingest_and_split.py --config config/params.yaml
           python src/stages/02_preprocess.py --config config/params.yaml
           python src/stages/03_train.py --config config/params.yaml
           python src/stages/04_evaluate.py --config config/params.yaml
+
         
       - name: Verify Model Artifacts and Quality Gate
         run: |
