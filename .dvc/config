@@ -1,0 +1,4 @@
+[core]
+    remote = myremote
+['remote "myremote"']
+    url = s3://aws-mlops-s3-bucket-data2095/fraud-detector/dvcstore

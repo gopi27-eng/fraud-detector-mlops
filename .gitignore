@@ -11,8 +11,7 @@ __pycache__/
 # Logs
 logs/
 
-# DVC internals
-.dvc/
+
 
 # MLflow tracking
 mlruns/
