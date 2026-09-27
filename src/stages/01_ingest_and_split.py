@@ -1,10 +1,9 @@
 import argparse
 from pathlib import Path
-from logs.pipeline_setup_log import log_setup
+from src.core.logger import logger
 import pandas as pd
 import yaml
 
-logger = log_setup()
 
 def load_params(config_path: str = "config/params.yaml") -> dict:
     with open(config_path, "r") as f:

@@ -1,0 +1,6 @@
+{
+    "train_roc_auc": 0.9096,
+    "test_roc_auc": 0.5903,
+    "train_pr_auc": 0.2447,
+    "test_pr_auc": 0.064
+}

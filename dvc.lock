@@ -1,0 +1,164 @@
+schema: '2.0'
+stages:
+  ingest_and_split:
+    cmd: python -m src.stages.01_ingest_and_split --config config/params.yaml
+    deps:
+    - path: data/raw/raw_with_target.csv
+      hash: md5
+      md5: 46913cc684e2e17609cbcd1f31cd5403
+      size: 52604
+      isexec: true
+    - path: src/stages/01_ingest_and_split.py
+      hash: md5
+      md5: 8a1dac265fca5b234c1db4e233e57a45
+      size: 3013
+      isexec: true
+    params:
+      config/params.yaml:
+        data:
+          raw_data_path: data/raw/raw_with_target.csv
+          processed_dir: data/processed
+          train_path: data/processed/train.parquet
+          test_path: data/processed/test.parquet
+          temporal_split_column: step
+          test_split_ratio: 0.2
+          target_col: isFraud
+          drop_cols:
+          - nameOrig
+          - nameDest
+          - isFlaggedFraud
+    outs:
+    - path: data/processed/test.parquet
+      hash: md5
+      md5: f4857e5661397071ae712aba42dfa268
+      size: 12763
+      isexec: true
+    - path: data/processed/train.parquet
+      hash: md5
+      md5: 00c720a5f6b8cc1f3289d33aa34b90b4
+      size: 35228
+      isexec: true
+  preprocess:
+    cmd: python -m src.stages.02_preprocess --config config/params.yaml
+    deps:
+    - path: data/processed/test.parquet
+      hash: md5
+      md5: f4857e5661397071ae712aba42dfa268
+      size: 12763
+      isexec: true
+    - path: data/processed/train.parquet
+      hash: md5
+      md5: 00c720a5f6b8cc1f3289d33aa34b90b4
+      size: 35228
+      isexec: true
+    - path: src/stages/02_preprocess.py
+      hash: md5
+      md5: a46f224634be106abe708cba10ffb7b8
+      size: 3667
+      isexec: true
+    params:
+      config/params.yaml:
+        preprocessing:
+          artifacts_dir: artifacts
+          preprocessor_path: artifacts/preprocessor.joblib
+          train_features_path: data/processed/train_features.parquet
+          test_features_path: data/processed/test_features.parquet
+          categorical_features:
+          - type
+          numeric_features:
+          - step
+          - amount
+          - oldbalanceOrg
+          - newbalanceOrig
+          - oldbalanceDest
+          - newbalanceDest
+          - errorBalanceOrig
+          - errorBalanceDest
+    outs:
+    - path: artifacts/preprocessor.joblib
+      hash: md5
+      md5: 96b28501769e7a53bdbb585ab84e918b
+      size: 2940
+      isexec: true
+    - path: data/processed/test_features.parquet
+      hash: md5
+      md5: d1ad8e341c8f247a98f937e159afbaa6
+      size: 21732
+      isexec: true
+    - path: data/processed/train_features.parquet
+      hash: md5
+      md5: 863e6235e62eb222a72913215f72cd50
+      size: 58596
+      isexec: true
+  train:
+    cmd: python -m src.stages.03_train --config config/params.yaml
+    deps:
+    - path: data/processed/test_features.parquet
+      hash: md5
+      md5: d1ad8e341c8f247a98f937e159afbaa6
+      size: 21732
+      isexec: true
+    - path: data/processed/train_features.parquet
+      hash: md5
+      md5: 863e6235e62eb222a72913215f72cd50
+      size: 58596
+      isexec: true
+    - path: src/stages/03_train.py
+      hash: md5
+      md5: 1e72750c6f241e5f6ed25a47dff448f3
+      size: 3800
+      isexec: true
+    params:
+      config/params.yaml:
+        train:
+          model_dir: artiacts
+          model_path: artifacts/model.json
+          experiment_name: fraud-detector-training
+          algorithm: xgboost
+          params:
+            n_estimators: 50
+            max_depth: 2
+            learning_rate: 0.03
+            min_child_weight: 5
+            gamma: 1.0
+            reg_alpha: 1.0
+            reg_lambda: 2.0
+            subsample: 0.7
+            colsample_bytree: 0.7
+    outs:
+    - path: artifacts/model.json
+      hash: md5
+      md5: 79d1ba4f45164ec596ea00b360ce5261
+      size: 38110
+      isexec: true
+  evaluate:
+    cmd: python -m src.stages.04_evaluate --config config/params.yaml
+    deps:
+    - path: artifacts/model.json
+      hash: md5
+      md5: 79d1ba4f45164ec596ea00b360ce5261
+      size: 38110
+      isexec: true
+    - path: data/processed/test_features.parquet
+      hash: md5
+      md5: d1ad8e341c8f247a98f937e159afbaa6
+      size: 21732
+      isexec: true
+    - path: src/stages/04_evaluate.py
+      hash: md5
+      md5: c856a2207c3e7cba22fb1f5851926770
+      size: 4138
+      isexec: true
+    params:
+      config/params.yaml:
+        evaluate:
+          metrics_output_path: artifacts/metrics.json
+          min_test_pr_auc: 0.05
+          min_test_roc_auc: 0.55
+          max_auc_drop_ratio: 0.4
+    outs:
+    - path: artifacts/metrics.json
+      hash: md5
+      md5: f023db12a4dc339ab929ddad83c58ca6
+      size: 113
+      isexec: true

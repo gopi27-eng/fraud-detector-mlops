@@ -1,0 +1,51 @@
+stages:
+  ingest_and_split:
+    cmd: python -m src.stages.01_ingest_and_split --config config/params.yaml
+    deps:
+      - src/stages/01_ingest_and_split.py
+      - data/raw/raw_with_target.csv
+    params:
+      - config/params.yaml:
+          - data
+    outs:
+      - data/processed/train.parquet
+      - data/processed/test.parquet
+
+  preprocess:
+    cmd: python -m src.stages.02_preprocess --config config/params.yaml
+    deps:
+      - src/stages/02_preprocess.py
+      - data/processed/train.parquet
+      - data/processed/test.parquet
+    params:
+      - config/params.yaml:
+          - preprocessing
+    outs:
+      - artifacts/preprocessor.joblib
+      - data/processed/train_features.parquet
+      - data/processed/test_features.parquet
+
+  train:
+    cmd: python -m src.stages.03_train --config config/params.yaml
+    deps:
+      - src/stages/03_train.py
+      - data/processed/train_features.parquet
+      - data/processed/test_features.parquet
+    params:
+      - config/params.yaml:
+          - train
+    outs:
+      - artifacts/model.json
+
+  evaluate:
+    cmd: python -m src.stages.04_evaluate --config config/params.yaml
+    deps:
+      - src/stages/04_evaluate.py
+      - artifacts/model.json
+      - data/processed/test_features.parquet
+    params:
+      - config/params.yaml:
+          - evaluate
+    metrics:
+      - artifacts/metrics.json:
+          cache: false
