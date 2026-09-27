@@ -103,7 +103,7 @@ def evaluate(config_path: str):
         logger.warning("[-] Candidate model rejected. Halting downstream deployment.")
         sys.exit(1)
     else:
-        logger.success("[+] PRODUCTION QUALITY GATE: PASSED. Candidate model promoted.")
+        logger.info("[+] PRODUCTION QUALITY GATE: PASSED. Candidate model promoted.")
         sys.exit(0)
 
 
